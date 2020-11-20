@@ -1,0 +1,38 @@
+.header {
+  height: 200px;
+  width: 95%;
+  margin-left: 5%;
+  min-width: 800px;
+  background-color: rgb(41, 108, 255);
+  border-radius: 0 0 0 512px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding-left: 300px;
+
+  &__logo {
+    height: 150px;
+    width: 150px;
+    position: absolute;
+    left: 100px;
+    filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
+  }
+
+  &__title {
+    font-size: 5rem;
+    font-weight: 600;
+    position: relative;
+    color: white;
+    filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
+  }
+
+  &__subtitle {
+    font-size: 3rem;
+    font-weight: 400;
+    margin-top: -25px;
+    margin-left: 130px;
+    color: white;
+    filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
+  }
+}

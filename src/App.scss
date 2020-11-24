@@ -5,5 +5,15 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  align-items: center;
+
+  &__background {
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    height: 200px;
+    opacity: 0.1;
+    filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
+  }
 }

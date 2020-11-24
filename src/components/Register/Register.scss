@@ -1,0 +1,151 @@
+.register {
+  height: 500px;
+  width: 400px;
+  margin-top: 50px;
+  background-color: rgb(93, 144, 255);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__loginIcon {
+    position: absolute;
+    bottom: 7px;
+    left: 7px;
+    font-size: 2rem !important;
+    fill: white !important;
+    filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+    cursor: pointer;
+  }
+
+  &__header {
+    position: relative;
+    z-index: 1;
+    font-size: 3rem;
+    font-weight: 400;
+    filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+    margin-top: 30px;
+  }
+
+  .form {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    width: 90%;
+    margin-top: 30px;
+
+    &__nickname,
+    &__password {
+      height: 50px;
+      width: 300px;
+      position: relative;
+      margin-bottom: 20px;
+
+      .icon {
+        position: absolute;
+        fill: black !important;
+        z-index: 2;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+      }
+
+      .input {
+        height: 100%;
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        padding-left: 50px;
+        position: absolute;
+        filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+        outline: none;
+        font-size: 1.2rem;
+      }
+
+      .visibilityIcon {
+        position: absolute;
+        fill: black !important;
+        z-index: 2;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+    }
+
+    &__button {
+      margin-top: 20px;
+      height: 50px;
+      width: 300px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      font-weight: 400;
+      background-color: white;
+      filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+      position: relative;
+      cursor: pointer;
+      outline: none;
+
+      &:hover {
+        &::before {
+          content: "";
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 10px;
+          left: 10px;
+          border-bottom: 2px solid black;
+          border-right: 2px solid black;
+          border-bottom-right-radius: 10px;
+          animation: outlineButton ease-in-out 0.5s;
+        }
+      }
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(41, 109, 255, 0.616);
+    border-radius: 10px 10px 10px 180px;
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(41, 108, 255);
+    border-radius: 10px 10px 10px 250px;
+    z-index: 0;
+  }
+}
+
+@keyframes outlineButton {
+  from {
+    width: 0;
+    height: 0;
+    top: calc(100% + 10px);
+    left: calc(100% + 10px);
+  }
+  to {
+    width: 100%;
+    height: 100%;
+    top: 10px;
+    left: 10px;
+  }
+}

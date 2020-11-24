@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import "./Login.scss";
-import PersonAddIcon from "@material-ui/icons/PersonAdd";
+import { useDispatch } from "react-redux";
+import "./Register.scss";
+import * as formTypes from "../../types/formTypes";
 import PersonIcon from "@material-ui/icons/Person";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
-function Login() {
+function Register() {
+  const dispatch = useDispatch();
   const [visibility, setVisibility] = useState(false);
 
   return (
-    <section className="login">
-      <h3 className="login__header">Login</h3>
+    <section className="register">
+      <h3 className="register__header">Register</h3>
       <form className="form">
         <section className="form__nickname">
           <PersonIcon className="icon" />
@@ -44,13 +47,39 @@ function Login() {
           )}
         </section>
 
+        <section className="form__password">
+          <LockOpenIcon className="icon" />
+          <input
+            type={visibility ? "text" : "password"}
+            id="formRepeatedPassword"
+            className="input"
+            placeholder="Repeat password"
+          />
+          {visibility ? (
+            <VisibilityOffIcon
+              className="visibilityIcon"
+              onClick={() => setVisibility(false)}
+            />
+          ) : (
+            <VisibilityIcon
+              className="visibilityIcon"
+              onClick={() => setVisibility(true)}
+            />
+          )}
+        </section>
+
         <button type="submit" className="form__button">
-          Login
+          Register
         </button>
       </form>
-      <PersonAddIcon className="login__registerIcon" />
+      <ArrowBackIcon
+        className="register__loginIcon"
+        onClick={() =>
+          dispatch({ type: formTypes.TYPE_CHANGED, newFormType: "login" })
+        }
+      />
     </section>
   );
 }
 
-export default Login;
+export default Register;

@@ -69,6 +69,10 @@
         font-size: 1.2rem;
       }
 
+      .error {
+        border: 2px solid red;
+      }
+
       .visibilityIcon {
         position: absolute;
         fill: black !important;
@@ -91,8 +95,11 @@
       background-color: white;
       filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
       position: relative;
-      cursor: pointer;
       outline: none;
+    }
+
+    .active {
+      cursor: pointer;
 
       &:hover {
         &::before {
@@ -148,4 +155,8 @@
     top: 10px;
     left: 10px;
   }
+}
+
+.temp {
+  position: relative;
 }

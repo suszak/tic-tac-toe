@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import "./Login.scss";
-import * as formTypes from "../../types/formTypes";
-import * as userTypes from "../../types/userTypes";
+import * as formActions from "../../actions/formActions.js";
+import * as userActions from "../../actions/userActions.js";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import PersonIcon from "@material-ui/icons/Person";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
@@ -25,7 +25,8 @@ function Login() {
     setPassword(event.target.value);
   };
 
-  const loginUser = async () => {
+  const loginUser = async (e) => {
+    e.preventDefault();
     const body = {
       login: login,
       password: password,
@@ -33,12 +34,16 @@ function Login() {
     return await axios.post("/login/", body);
   };
 
-  const checkSuccess = () => {
-    loginUser().then((response) => {
-      if (response.data.error) {
-        dispatch({ type: userTypes.SET_ERROR, error: response.data.error });
+  const checkSuccess = (e) => {
+    loginUser(e).then((response) => {
+      if (response.data.logged) {
+        // success
+        dispatch(userActions.LoginUser(response.data.userLogin));
+        setLogin("");
+        setPassword("");
       } else {
-        dispatch({ type: userTypes.LOGGED_IN, login: response.data.userLogin });
+        // error
+        console.log(response.data.error);
       }
     });
   };
@@ -54,7 +59,7 @@ function Login() {
   return (
     <section className="login">
       <h3 className="login__header">Login</h3>
-      <div className="form">
+      <form className="form" onSubmit={checkSuccess}>
         <section className="form__nickname">
           <PersonIcon className="icon" />
           <input
@@ -95,16 +100,13 @@ function Login() {
         <button
           className={buttonDisabled ? "form__button" : "form__button active"}
           disabled={buttonDisabled}
-          onClick={checkSuccess}
         >
           Login
         </button>
-      </div>
+      </form>
       <PersonAddIcon
         className="login__registerIcon"
-        onClick={() =>
-          dispatch({ type: formTypes.TYPE_CHANGED, newFormType: "register" })
-        }
+        onClick={() => dispatch(formActions.changeFormType("register"))}
       />
     </section>
   );

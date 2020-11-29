@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Tooltip from "rc-tooltip";
 import "./Register.scss";
-import * as formTypes from "../../types/formTypes";
+import * as formActions from "../../actions/formActions.js";
 import PersonIcon from "@material-ui/icons/Person";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -16,8 +16,8 @@ function Register() {
   const [visibilityFirst, setVisibilityFirst] = useState(false);
   const [visibilitySecond, setVisibilitySecond] = useState(false);
   const [login, setLogin] = useState("");
-  const [password, setPassword] = useState(null);
-  const [passwordRepeated, setPasswordRepeated] = useState(null);
+  const [password, setPassword] = useState("");
+  const [passwordRepeated, setPasswordRepeated] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
 
   const handleLogin = (event) => {
@@ -32,51 +32,60 @@ function Register() {
     setPasswordRepeated(event.target.value);
   };
 
-  const registerUser = async () => {
+  const registerUser = async (e) => {
+    e.preventDefault();
     const body = {
       login: login,
       password: password,
     };
-    const response = await axios.post("/register/", body);
-    console.log(response);
+
+    return await axios.post("/register/", body);
+  };
+
+  const checkSuccess = (e) => {
+    registerUser(e).then((response) => {
+      if (response.data.registered) {
+        // Success
+        dispatch(formActions.changeFormType("login"));
+      } else {
+        // Error
+        console.log(response.data.error);
+      }
+    });
   };
 
   useEffect(() => {
     if (
       login !== "" &&
-      password !== "" &&
-      passwordRepeated !== "" &&
-      password &&
-      passwordRepeated
+      password.length >= 6 &&
+      passwordRepeated === password &&
+      passwordRepeated.length >= 6
     ) {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
     }
 
-    if (password) {
-      if (password.length < 6) {
-        document.querySelector("#formPassword").classList.add("error");
-      } else {
-        document.querySelector("#formPassword").classList.remove("error");
-      }
+    if (password.length < 6 && password !== "") {
+      document.querySelector("#formPassword").classList.add("error");
+    } else {
+      document.querySelector("#formPassword").classList.remove("error");
     }
 
-    if (passwordRepeated) {
-      if (passwordRepeated !== password) {
-        document.querySelector("#formPasswordRepeated").classList.add("error");
-      } else {
-        document
-          .querySelector("#formPasswordRepeated")
-          .classList.remove("error");
-      }
+    if (
+      (passwordRepeated !== password || passwordRepeated.length < 6) &&
+      passwordRepeated !== ""
+    ) {
+      document.querySelector("#formPasswordRepeated").classList.add("error");
+    } else {
+      document.querySelector("#formPasswordRepeated").classList.remove("error");
     }
   }, [login, password, passwordRepeated]);
 
   return (
     <section className="register">
       <h3 className="register__header">Register</h3>
-      <div className="form">
+      <form className="form" onSubmit={checkSuccess}>
         <section className="form__nickname">
           <PersonIcon className="icon" />
           <input
@@ -155,18 +164,16 @@ function Register() {
         </Tooltip>
 
         <button
+          type="submit"
           className={buttonDisabled ? "form__button" : "form__button active"}
           disabled={buttonDisabled}
-          onClick={registerUser}
         >
           Register
         </button>
-      </div>
+      </form>
       <ArrowBackIcon
         className="register__loginIcon"
-        onClick={() =>
-          dispatch({ type: formTypes.TYPE_CHANGED, newFormType: "login" })
-        }
+        onClick={() => dispatch(formActions.changeFormType("login"))}
       />
     </section>
   );

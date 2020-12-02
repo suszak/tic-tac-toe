@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Tooltip from "rc-tooltip";
+import { store } from "react-notifications-component";
 import "./Register.scss";
 import * as formActions from "../../actions/formActions.js";
 import PersonIcon from "@material-ui/icons/Person";
@@ -49,7 +50,19 @@ function Register() {
         dispatch(formActions.changeFormType("login"));
       } else {
         // Error
-        console.log(response.data.error);
+        store.addNotification({
+          title: "Something went wrong!",
+          message: response.data.error,
+          type: "danger",
+          insert: "top",
+          container: "top-right",
+          animationIn: ["animate__animated", "animate__fadeIn"],
+          animationOut: ["animate__animated", "animate__fadeOut"],
+          dismiss: {
+            duration: 5000,
+            onScreen: true,
+          },
+        });
       }
     });
   };

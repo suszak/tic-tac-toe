@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { store } from "react-notifications-component";
+import { useHistory } from "react-router-dom";
 import "./Login.scss";
 import * as formActions from "../../actions/formActions.js";
 import * as userActions from "../../actions/userActions.js";
@@ -12,6 +14,7 @@ import axios from "../../axios.js";
 
 function Login() {
   const dispatch = useDispatch();
+  let history = useHistory();
   const [visibility, setVisibility] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -39,11 +42,22 @@ function Login() {
       if (response.data.logged) {
         // success
         dispatch(userActions.LoginUser(response.data.userLogin));
-        setLogin("");
-        setPassword("");
+        history.push("/tables");
       } else {
         // error
-        console.log(response.data.error);
+        store.addNotification({
+          title: "Something went wrong!",
+          message: response.data.error,
+          type: "danger",
+          insert: "top",
+          container: "top-right",
+          animationIn: ["animate__animated", "animate__fadeIn"],
+          animationOut: ["animate__animated", "animate__fadeOut"],
+          dismiss: {
+            duration: 5000,
+            onScreen: true,
+          },
+        });
       }
     });
   };

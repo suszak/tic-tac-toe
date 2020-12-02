@@ -1,15 +1,31 @@
+import ReactNotification from "react-notifications-component";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+
+import "react-notifications-component/dist/theme.css";
 import "./App.scss";
+
 import Header from "./containers/Header/Header";
 import Background from "./pictures/background.png";
 import StartPage from "./containers/StartPage/StartPage";
+import Tables from "./containers/Tables/Tables";
 
 function App() {
   return (
-    <div className="app">
-      <Header />
-      <StartPage />
-      <img src={Background} className="app__background" alt="Background" />
-    </div>
+    <Router>
+      <div className="app">
+        <ReactNotification />
+        <Header />
+        <Switch>
+          <Route path="/tables">
+            <Tables />
+          </Route>
+          <Route path="/">
+            <StartPage />
+          </Route>
+        </Switch>
+        <img src={Background} className="app__background" alt="Background" />
+      </div>
+    </Router>
   );
 }
 

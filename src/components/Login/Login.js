@@ -41,7 +41,9 @@ function Login() {
     loginUser(e).then((response) => {
       if (response.data.logged) {
         // success
-        dispatch(userActions.LoginUser(response.data.userLogin));
+        dispatch(
+          userActions.LoginUser(response.data.userLogin, response.data.isAdmin)
+        );
         history.push("/tables");
       } else {
         // error

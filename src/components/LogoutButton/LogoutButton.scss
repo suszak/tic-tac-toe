@@ -1,0 +1,21 @@
+.logoutButton {
+  height: 30px;
+  width: 200px;
+  border: none;
+  border-radius: 0 0 10px 10px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: white;
+  background-color: rgb(93, 144, 255);
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  animation: buttonIn 0.5s;
+
+  &:hover {
+    animation: buttonOut 0.5s;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+}

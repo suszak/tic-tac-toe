@@ -3,4 +3,63 @@
   grid-template-columns: 80% 20%;
   width: 100%;
   height: 100%;
+  position: relative;
+
+  &__menu {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    height: 50px;
+    width: 450px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+
+    .menuButton {
+      height: 30px;
+      width: 200px;
+      border: none;
+      border-radius: 0 0 10px 10px;
+      font-size: 1rem;
+      font-weight: 400;
+      color: white;
+      background-color: rgb(93, 144, 255);
+      filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      animation: buttonIn 0.5s;
+      margin-right: 50px;
+
+      &:hover {
+        animation: buttonOut 0.5s;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+    }
+  }
+
+  @keyframes buttonOut {
+    from {
+      height: 30px;
+      font-size: 1rem;
+    }
+
+    to {
+      height: 50px;
+      font-size: 1.5rem;
+    }
+  }
+
+  @keyframes buttonIn {
+    from {
+      height: 50px;
+      font-size: 1.5rem;
+    }
+
+    to {
+      height: 30px;
+      font-size: 1rem;
+    }
+  }
 }

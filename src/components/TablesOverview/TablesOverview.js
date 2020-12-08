@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { store } from "react-notifications-component";
+import { useSelector, useDispatch } from "react-redux";
 import { io } from "socket.io-client";
-
+import { store } from "react-notifications-component";
+import * as tablesActions from "../../actions/tablesActions.js";
 import "./TablesOverview.scss";
 import axios from "../../axios.js";
 
 function Tables() {
+  const dispatch = useDispatch();
+  const socketRef = useRef();
+
   const user = useSelector((state) => state.user);
-  let history = useHistory();
+  const tables = useSelector((state) => state.tables.tables);
 
   const [rankPoints, setRankPoints] = useState("updating...");
-  const [tables, setTables] = useState([]);
 
   const getUserInfo = async () => {
     const body = {
@@ -26,17 +27,43 @@ function Tables() {
   };
 
   const joinTable = (tableID, userNumber) => {
-    let newTables = [...tables];
-    if (userNumber === 1) {
-      newTables[tableID - 1] = { ...newTables[tableID - 1], user1: user.login };
+    if (
+      tables.find((item) => {
+        return item.user1 === user.login || item.user2 === user.login;
+      }) !== undefined
+    ) {
+      store.addNotification({
+        title: "Can't join!",
+        message: "You're already in game.",
+        type: "danger",
+        insert: "top",
+        container: "top-right",
+        animationIn: ["animate__animated", "animate__fadeIn"],
+        animationOut: ["animate__animated", "animate__fadeOut"],
+        dismiss: {
+          duration: 5000,
+          onScreen: true,
+        },
+      });
+
+      return tables;
     } else {
-      newTables[tableID - 1] = { ...newTables[tableID - 1], user2: user.login };
+      let newTables = [...tables];
+      if (userNumber === 1) {
+        newTables[tableID - 1] = {
+          ...newTables[tableID - 1],
+          user1: user.login,
+        };
+      } else {
+        newTables[tableID - 1] = {
+          ...newTables[tableID - 1],
+          user2: user.login,
+        };
+      }
+
+      return newTables;
     }
-
-    return newTables;
   };
-
-  const socketRef = useRef();
 
   useEffect(() => {
     if (user.login) {
@@ -48,7 +75,7 @@ function Tables() {
 
       getTables().then((response) => {
         if (!response.error) {
-          setTables(response.data);
+          dispatch(tablesActions.UpdateTables(response.data));
         }
       });
 
@@ -58,23 +85,7 @@ function Tables() {
       });
 
       socketRef.current.on("tablesUpdated", (tables) => {
-        setTables(tables);
-      });
-    } else {
-      history.push("/");
-
-      store.addNotification({
-        title: "User not logged!",
-        message: "First log in.",
-        type: "danger",
-        insert: "top",
-        container: "top-right",
-        animationIn: ["animate__animated", "animate__fadeIn"],
-        animationOut: ["animate__animated", "animate__fadeOut"],
-        dismiss: {
-          duration: 5000,
-          onScreen: true,
-        },
+        dispatch(tablesActions.UpdateTables(tables));
       });
     }
 
@@ -119,12 +130,16 @@ function Tables() {
                           ? "overviewTable__player overviewTable__player-empty"
                           : "overviewTable__player"
                       }
-                      onClick={() => {
-                        socketRef.current.emit(
-                          "tablesUpdated",
-                          joinTable(table.id, 1)
-                        );
-                      }}
+                      onClick={
+                        table.user1 === ""
+                          ? () => {
+                              socketRef.current.emit(
+                                "tablesUpdated",
+                                joinTable(table.id, 1)
+                              );
+                            }
+                          : () => {}
+                      }
                     >
                       {table.user1 === "" ? ">> join <<" : table.user1}
                     </p>
@@ -134,12 +149,16 @@ function Tables() {
                           ? "overviewTable__player overviewTable__player-empty"
                           : "overviewTable__player"
                       }
-                      onClick={() => {
-                        socketRef.current.emit(
-                          "tablesUpdated",
-                          joinTable(table.id, 2)
-                        );
-                      }}
+                      onClick={
+                        table.user2 === ""
+                          ? () => {
+                              socketRef.current.emit(
+                                "tablesUpdated",
+                                joinTable(table.id, 2)
+                              );
+                            }
+                          : () => {}
+                      }
                     >
                       {table.user2 === "" ? ">> join <<" : table.user2}
                     </p>

@@ -19,8 +19,11 @@ function Ranking() {
 
   return (
     <div className="ranking">
+      <header className="ranking__header">
+        <h1 className="headerText">Top 5 players</h1>
+      </header>
       {/* Show top 5 users */}
-      <ul>
+      <ul className="ranking__list">
         {top5Users.data?.length > 0
           ? top5Users.data.map((user, index) => {
               return (

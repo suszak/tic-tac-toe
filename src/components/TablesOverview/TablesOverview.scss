@@ -1,0 +1,110 @@
+.tables {
+  height: 600px;
+  width: 1000px;
+  margin-top: 50px;
+  background-color: rgb(93, 144, 255);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  justify-self: center;
+  margin-top: -50px;
+
+  &__header {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .headerFirstLine {
+      font-size: 3rem;
+      font-weight: normal;
+
+      &__username {
+        font-style: italic;
+        font-weight: bold;
+      }
+    }
+
+    .headerSecondLine {
+      font-size: 2rem;
+      font-weight: normal;
+
+      &__points {
+        font-weight: bold;
+      }
+    }
+  }
+
+  &__overview {
+    height: 450px;
+    width: 100%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .overviewTable {
+      width: 70%;
+      height: 80%;
+      border: 2px solid white;
+      border-radius: 10px;
+      background-color: rgba(3, 43, 129, 0.671);
+      list-style-type: none;
+
+      &__row {
+        height: 27%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        font-size: 1.2rem;
+        border-top: 1px solid white;
+      }
+
+      &__header {
+        height: 17%;
+        font-weight: bold;
+        border: none;
+      }
+
+      &__number,
+      &__player {
+        place-self: center;
+
+        &-empty {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(41, 109, 255, 0.616);
+    border-radius: 10px 10px 10px 180px;
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(41, 108, 255);
+    border-radius: 10px 10px 10px 250px;
+    z-index: 0;
+  }
+}

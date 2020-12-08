@@ -7,7 +7,7 @@ import "./App.scss";
 import Header from "./containers/Header/Header";
 import Background from "./pictures/background.png";
 import StartPage from "./containers/StartPage/StartPage";
-import Tables from "./containers/Tables/Tables";
+import Tables from "./containers/Tables/Tables.js";
 
 function App() {
   return (

@@ -5,6 +5,7 @@ import { store } from "react-notifications-component";
 import * as tablesActions from "../../actions/tablesActions.js";
 import "./TablesOverview.scss";
 import axios from "../../axios.js";
+import { updateTableField } from "./../../helpers/updateTableField";
 
 function Tables() {
   const dispatch = useDispatch();
@@ -48,20 +49,13 @@ function Tables() {
 
       return tables;
     } else {
-      let newTables = [...tables];
-      if (userNumber === 1) {
-        newTables[tableID - 1] = {
-          ...newTables[tableID - 1],
-          user1: user.login,
-        };
-      } else {
-        newTables[tableID - 1] = {
-          ...newTables[tableID - 1],
-          user2: user.login,
-        };
-      }
-
-      return newTables;
+      return {
+        userName: user.login,
+        tableID: tableID,
+        userNumber: userNumber,
+        currentTables: tables,
+      };
+      // return updateTableField(user.login, tableID, userNumber, tables);
     }
   };
 
@@ -84,9 +78,16 @@ function Tables() {
         query: { room },
       });
 
-      socketRef.current.on("tablesUpdated", (tables) => {
-        dispatch(tablesActions.UpdateTables(tables));
-      });
+      socketRef.current.on(
+        "tablesUpdated",
+        ({ userName, tableID, userNumber, currentTables }) => {
+          dispatch(
+            tablesActions.UpdateTables(
+              updateTableField(userName, tableID, userNumber, currentTables)
+            )
+          );
+        }
+      );
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

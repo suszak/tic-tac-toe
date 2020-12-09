@@ -17,8 +17,21 @@ export const leaveTable = (tables, userName) => {
           : newTables[inGame.id - 1].user2,
     };
 
-    return newTables;
+    const body = {
+      userNumber: tables[inGame.id - 1].user1 === userName ? 1 : 2,
+      userName: "",
+      tableID: inGame.id,
+      currentTables: tables,
+    };
+
+    return {
+      userName: body.userName,
+      tableID: body.tableID,
+      userNumber: body.userNumber,
+      currentTables: tables,
+      changed: true,
+    };
   } else {
-    return tables;
+    return { changed: false };
   }
 };

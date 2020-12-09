@@ -24,7 +24,17 @@ function Tables() {
   };
 
   const getTables = async () => {
-    return await axios.get("/getTables");
+    return await axios.get("/getTables/");
+  };
+
+  const updateTables = async (userNumber, userName, tableID) => {
+    const body = {
+      userNumber,
+      userName,
+      tableID,
+    };
+
+    return await axios.put("/updateTables/", body);
   };
 
   const joinTable = (tableID, userNumber) => {
@@ -47,13 +57,14 @@ function Tables() {
         },
       });
 
-      return tables;
+      return { changed: false };
     } else {
       return {
         userName: user.login,
         tableID: tableID,
         userNumber: userNumber,
         currentTables: tables,
+        changed: true,
       };
       // return updateTableField(user.login, tableID, userNumber, tables);
     }
@@ -80,12 +91,14 @@ function Tables() {
 
       socketRef.current.on(
         "tablesUpdated",
-        ({ userName, tableID, userNumber, currentTables }) => {
-          dispatch(
-            tablesActions.UpdateTables(
-              updateTableField(userName, tableID, userNumber, currentTables)
-            )
-          );
+        ({ userName, tableID, userNumber, currentTables, changed }) => {
+          if (changed) {
+            dispatch(
+              tablesActions.UpdateTables(
+                updateTableField(userName, tableID, userNumber, currentTables)
+              )
+            );
+          }
         }
       );
     }
@@ -134,10 +147,19 @@ function Tables() {
                       onClick={
                         table.user1 === ""
                           ? () => {
-                              socketRef.current.emit(
-                                "tablesUpdated",
-                                joinTable(table.id, 1)
-                              );
+                              const data = joinTable(table.id, 1);
+                              if (data.changed) {
+                                updateTables(1, user.login, table.id).then(
+                                  (response) => {
+                                    if (response.data.updated) {
+                                      socketRef.current.emit(
+                                        "tablesUpdated",
+                                        data
+                                      );
+                                    }
+                                  }
+                                );
+                              }
                             }
                           : () => {}
                       }
@@ -153,10 +175,19 @@ function Tables() {
                       onClick={
                         table.user2 === ""
                           ? () => {
-                              socketRef.current.emit(
-                                "tablesUpdated",
-                                joinTable(table.id, 2)
-                              );
+                              const data = joinTable(table.id, 2);
+                              if (data.changed) {
+                                updateTables(2, user.login, table.id).then(
+                                  (response) => {
+                                    if (response.data.updated) {
+                                      socketRef.current.emit(
+                                        "tablesUpdated",
+                                        data
+                                      );
+                                    }
+                                  }
+                                );
+                              }
                             }
                           : () => {}
                       }

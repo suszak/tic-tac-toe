@@ -44,6 +44,7 @@ function Login() {
         dispatch(
           userActions.LoginUser(response.data.userLogin, response.data.isAdmin)
         );
+        localStorage.setItem("userName", response.data.userLogin);
         history.push("/tables");
       } else {
         // error

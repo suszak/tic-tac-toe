@@ -104,7 +104,7 @@ function Tables() {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user.login]);
 
   return (
     <div className="tables">

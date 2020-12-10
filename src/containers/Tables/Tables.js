@@ -3,32 +3,36 @@ import "./Tables.scss";
 import TablesOverview from "../../components/TablesOverview/TablesOverview.js";
 import Ranking from "../../components/Ranking/Ranking";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { store } from "react-notifications-component";
 import { useHistory } from "react-router-dom";
+import { checkIfUserIsLogged } from "../../helpers/checkIsUserIsLogged";
 
 function Tables() {
   const user = useSelector((state) => state.user);
   let history = useHistory();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!user.login) {
-      history.push("/");
+    checkIfUserIsLogged(history, dispatch).then(() => {
+      if (!localStorage.getItem("userName")) {
+        history.replace("/");
 
-      store.addNotification({
-        title: "User not logged!",
-        message: "First log in.",
-        type: "danger",
-        insert: "top",
-        container: "top-right",
-        animationIn: ["animate__animated", "animate__fadeIn"],
-        animationOut: ["animate__animated", "animate__fadeOut"],
-        dismiss: {
-          duration: 5000,
-          onScreen: true,
-        },
-      });
-    }
+        store.addNotification({
+          title: "User not logged!",
+          message: "First log in.",
+          type: "danger",
+          insert: "top",
+          container: "top-right",
+          animationIn: ["animate__animated", "animate__fadeIn"],
+          animationOut: ["animate__animated", "animate__fadeOut"],
+          dismiss: {
+            duration: 5000,
+            onScreen: true,
+          },
+        });
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -40,7 +44,7 @@ function Tables() {
         ) : (
           ""
         )}
-        <LogoutButton/>
+        <LogoutButton />
       </nav>
       <TablesOverview />
       <Ranking />

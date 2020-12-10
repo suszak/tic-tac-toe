@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import "./LogoutButton.scss";
 import { io } from "socket.io-client";
-// import axios from "../../axios.js";
 import { store } from "react-notifications-component";
 import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,6 +24,7 @@ function LogoutButton() {
     updateTables(data).then(() => {
       socketRef.current.emit("tablesUpdated", data);
       dispatch(userActions.LogoutUser());
+      localStorage.clear();
 
       store.addNotification({
         title: "Logout!",
@@ -51,7 +51,7 @@ function LogoutButton() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user.login]);
 
   return (
     <button className="logoutButton" onClick={logout}>

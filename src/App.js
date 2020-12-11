@@ -8,6 +8,7 @@ import Header from "./containers/Header/Header";
 import Background from "./pictures/background.png";
 import StartPage from "./containers/StartPage/StartPage";
 import Tables from "./containers/Tables/Tables.js";
+import AdminPanel from "./containers/AdminPanel/AdminPanel";
 
 function App() {
   return (
@@ -16,6 +17,9 @@ function App() {
         <ReactNotification />
         <Header />
         <Switch>
+          <Route path="/adminPanel">
+            <AdminPanel />
+          </Route>
           <Route path="/tables">
             <Tables />
           </Route>

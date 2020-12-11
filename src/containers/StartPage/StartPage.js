@@ -5,7 +5,7 @@ import "./StartPage.scss";
 import Login from "../../components/Login/Login";
 import Register from "../../components/Register/Register";
 import { useHistory } from "react-router-dom";
-import { checkIfUserIsLogged } from "../../helpers/checkIsUserIsLogged";
+import { checkIfUserIsLogged } from "../../helpers/checkIfUserIsLogged";
 
 function StartPage() {
   const form = useSelector((state) => state.form);

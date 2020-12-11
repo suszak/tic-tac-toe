@@ -19,12 +19,16 @@ export const checkIfUserIsLogged = async (history, dispatch) => {
           )
         );
         history.replace("/tables");
-        return true;
+        return {
+          userName: localStorage.getItem("userName"),
+          isAdmin: response.data.isAdmin,
+        };
       } else {
         localStorage.clear();
-        return true;
+        return false;
       }
     });
+  } else {
+    return false;
   }
-  return true;
 };

@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { store } from "react-notifications-component";
 import "./AdminPanel.scss";
 import axios from "../../axios";
 import * as userActions from "../../actions/userActions";
+import * as usersListActions from "../../actions/usersListActions";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
 import UsersList from "../../components/UsersList/UsersList";
 
 function AdminPanel() {
   const user = useSelector((state) => state.user);
-  const [allUsers, setAllUsers] = useState([]);
+  const usersList = useSelector((state) => state.usersList);
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ function AdminPanel() {
     };
     return await axios.post("/getAdminStatus", body);
   };
+
   useEffect(() => {
     if (!user.login && localStorage.getItem("userName")) {
       getAdminStatus(localStorage.getItem("userName")).then((res) => {
@@ -84,7 +86,7 @@ function AdminPanel() {
         if (response !== undefined) {
           if (!response.data.error) {
             // Users get, update state
-            setAllUsers(response.data);
+            dispatch(usersListActions.updateList(response.data));
           }
         }
       });
@@ -110,7 +112,7 @@ function AdminPanel() {
       {/* Users list */}
       <main className="adminPanel__main">
         <h1 className="mainHeader">Admin Panel</h1>
-        <UsersList allUsers={allUsers} />
+        <UsersList allUsers={usersList} />
       </main>
     </div>
   );

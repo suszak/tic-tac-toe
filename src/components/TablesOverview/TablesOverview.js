@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { store } from "react-notifications-component";
 import * as tablesActions from "../../actions/tablesActions.js";
+import * as socketActions from "../../actions/socketActions.js";
 import "./TablesOverview.scss";
 import axios from "../../axios.js";
 import { updateTableField } from "./../../helpers/updateTableField";
@@ -66,7 +67,6 @@ function Tables() {
         currentTables: tables,
         changed: true,
       };
-      // return updateTableField(user.login, tableID, userNumber, tables);
     }
   };
 
@@ -85,9 +85,13 @@ function Tables() {
       });
 
       const room = "tables";
+
       socketRef.current = io("http://localhost:8001", {
         query: { room },
+        extraHeaders: { login: user.login },
       });
+
+      dispatch(socketActions.socketSet(socketRef.current));
 
       socketRef.current.on(
         "tablesUpdated",
@@ -101,10 +105,18 @@ function Tables() {
           }
         }
       );
+
+      socketRef.current.on("userDisconnected", () => {
+        getTables().then((response) => {
+          if (!response.error) {
+            dispatch(tablesActions.UpdateTables(response.data));
+          }
+        });
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.login]);
+  }, [user.login, socketRef]);
 
   return (
     <div className="tables">

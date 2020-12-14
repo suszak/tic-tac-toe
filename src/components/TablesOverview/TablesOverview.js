@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { io } from "socket.io-client";
 import { store } from "react-notifications-component";
 import * as tablesActions from "../../actions/tablesActions.js";
@@ -11,6 +12,7 @@ import { updateTableField } from "./../../helpers/updateTableField";
 function Tables() {
   const dispatch = useDispatch();
   const socketRef = useRef();
+  const history = useHistory();
 
   const user = useSelector((state) => state.user);
   const tables = useSelector((state) => state.tables.tables);
@@ -28,14 +30,20 @@ function Tables() {
     return await axios.get("/getTables/");
   };
 
-  const updateTables = async (userNumber, userName, tableID) => {
-    const body = {
-      userNumber,
-      userName,
-      tableID,
-    };
+  const updateTables = async (userNumber, userName, rankPoints, tableID) => {
+    console.log(rankPoints);
+    if (rankPoints.type !== "updating...") {
+      const body = {
+        userNumber,
+        userName,
+        rankPoints,
+        tableID,
+      };
 
-    return await axios.put("/updateTables/", body);
+      return await axios.put("/updateTables/", body);
+    } else {
+      return { updated: false };
+    }
   };
 
   const joinTable = (tableID, userNumber) => {
@@ -62,6 +70,7 @@ function Tables() {
     } else {
       return {
         userName: user.login,
+        rankPoints: rankPoints,
         tableID: tableID,
         userNumber: userNumber,
         currentTables: tables,
@@ -95,11 +104,24 @@ function Tables() {
 
       socketRef.current.on(
         "tablesUpdated",
-        ({ userName, tableID, userNumber, currentTables, changed }) => {
-          if (changed) {
+        ({
+          userName,
+          rankPoints,
+          tableID,
+          userNumber,
+          currentTables,
+          changed,
+        }) => {
+          if (changed && rankPoints !== "updating...") {
             dispatch(
               tablesActions.UpdateTables(
-                updateTableField(userName, tableID, userNumber, currentTables)
+                updateTableField(
+                  userName,
+                  tableID,
+                  userNumber,
+                  rankPoints,
+                  currentTables
+                )
               )
             );
           }
@@ -161,22 +183,28 @@ function Tables() {
                           ? () => {
                               const data = joinTable(table.id, 1);
                               if (data.changed) {
-                                updateTables(1, user.login, table.id).then(
-                                  (response) => {
-                                    if (response.data.updated) {
-                                      socketRef.current.emit(
-                                        "tablesUpdated",
-                                        data
-                                      );
-                                    }
+                                updateTables(
+                                  1,
+                                  user.login,
+                                  rankPoints,
+                                  table.id
+                                ).then((response) => {
+                                  if (response.data.updated) {
+                                    socketRef.current.emit(
+                                      "tablesUpdated",
+                                      data
+                                    );
+                                    history.replace(`/table/${table.id}`);
                                   }
-                                );
+                                });
                               }
                             }
                           : () => {}
                       }
                     >
-                      {table.user1 === "" ? ">> join <<" : table.user1}
+                      {table.user1 === ""
+                        ? ">> join <<"
+                        : `${table.user1}(${table.user1RankPoints})`}
                     </p>
                     <p
                       className={
@@ -196,6 +224,7 @@ function Tables() {
                                         "tablesUpdated",
                                         data
                                       );
+                                      history.replace(`/table/${table.id}`);
                                     }
                                   }
                                 );
@@ -204,7 +233,9 @@ function Tables() {
                           : () => {}
                       }
                     >
-                      {table.user2 === "" ? ">> join <<" : table.user2}
+                      {table.user2 === ""
+                        ? ">> join <<"
+                        : `${table.user2}(${table.user2RankPoints})`}
                     </p>
                   </li>
                 );

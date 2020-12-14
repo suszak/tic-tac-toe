@@ -9,6 +9,7 @@ import Background from "./pictures/background.png";
 import StartPage from "./containers/StartPage/StartPage";
 import Tables from "./containers/Tables/Tables.js";
 import AdminPanel from "./containers/AdminPanel/AdminPanel";
+import GameTable from "./containers/GameTable/GameTable";
 
 function App() {
   return (
@@ -17,6 +18,9 @@ function App() {
         <ReactNotification />
         <Header />
         <Switch>
+          <Route path="/table/:id">
+            <GameTable />
+          </Route>
           <Route path="/adminPanel">
             <AdminPanel />
           </Route>

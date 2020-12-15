@@ -31,7 +31,6 @@ function Tables() {
   };
 
   const updateTables = async (userNumber, userName, rankPoints, tableID) => {
-    console.log(rankPoints);
     if (rankPoints.type !== "updating...") {
       const body = {
         userNumber,
@@ -183,6 +182,10 @@ function Tables() {
                           ? () => {
                               const data = joinTable(table.id, 1);
                               if (data.changed) {
+                                socketRef.current.emit("joinGame", {
+                                  room: "table" + table.id,
+                                });
+
                                 updateTables(
                                   1,
                                   user.login,
@@ -217,17 +220,24 @@ function Tables() {
                           ? () => {
                               const data = joinTable(table.id, 2);
                               if (data.changed) {
-                                updateTables(2, user.login, table.id).then(
-                                  (response) => {
-                                    if (response.data.updated) {
-                                      socketRef.current.emit(
-                                        "tablesUpdated",
-                                        data
-                                      );
-                                      history.replace(`/table/${table.id}`);
-                                    }
+                                socketRef.current.emit("joinGame", {
+                                  room: "table" + table.id,
+                                });
+
+                                updateTables(
+                                  2,
+                                  user.login,
+                                  rankPoints,
+                                  table.id
+                                ).then((response) => {
+                                  if (response.data.updated) {
+                                    socketRef.current.emit(
+                                      "tablesUpdated",
+                                      data
+                                    );
+                                    history.replace(`/table/${table.id}`);
                                   }
-                                );
+                                });
                               }
                             }
                           : () => {}

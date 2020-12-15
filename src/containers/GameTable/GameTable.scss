@@ -1,3 +1,175 @@
+$border: 2px solid black;
+
 .gameTable {
-  color: black;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__menu {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    height: 50px;
+    width: 450px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+
+    .menuButton {
+      height: 30px;
+      width: 200px;
+      border: none;
+      border-radius: 0 0 10px 10px;
+      font-size: 1rem;
+      font-weight: 400;
+      color: white;
+      background-color: rgb(93, 144, 255);
+      filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      animation: buttonIn 0.5s;
+      margin-right: 50px;
+
+      &:hover {
+        animation: buttonOut 0.5s;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+    }
+  }
+
+  .gameField {
+    height: 600px;
+    width: 1000px;
+    margin-top: 50px;
+    background-color: rgb(93, 144, 255);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    justify-self: center;
+
+    &__header {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100px;
+      display: grid;
+      grid-template-columns: 45% 10% 45%;
+
+      .tableIdentifier {
+        font-size: 3rem;
+        font-weight: normal;
+      }
+
+      .separator {
+        font-weight: normal;
+        font-size: 1.5rem;
+        align-self: center;
+        justify-self: center;
+      }
+
+      .user1,
+      .user2 {
+        font-size: 2rem;
+        font-weight: 900;
+        align-self: center;
+        display: flex;
+        align-items: center;
+
+        .icon {
+          margin-right: 10px;
+          font-size: 2rem;
+        }
+      }
+
+      .user1 {
+        justify-self: right;
+      }
+    }
+
+    &__turn {
+      z-index: 1;
+      font-size: 2rem;
+    }
+
+    &__information {
+      z-index: 1;
+      font-size: 2.5rem;
+      margin-top: 150px;
+    }
+
+    &__main {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      background-color: rgba(255, 255, 255, 0.1);
+      width: 400px;
+      height: 400px;
+      z-index: 1;
+      position: relative;
+      margin-top: 30px;
+
+      .square {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:nth-child(-n + 3) {
+          border-bottom: $border;
+        }
+
+        &:nth-child(3n + 1) {
+          border-right: $border;
+        }
+
+        &:nth-child(3n) {
+          border-left: $border;
+        }
+
+        &:nth-child(n + 7) {
+          border-top: $border;
+        }
+
+        &-active {
+          cursor: pointer;
+        }
+
+        .gameSymbol {
+          font-size: 7rem;
+        }
+      }
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -20px;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(41, 109, 255, 0.616);
+      border-radius: 10px 10px 10px 180px;
+      z-index: 0;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(41, 108, 255);
+      border-radius: 10px 10px 10px 250px;
+      z-index: 0;
+    }
+  }
 }

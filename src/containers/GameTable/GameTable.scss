@@ -143,8 +143,77 @@ $border: 2px solid black;
           cursor: pointer;
         }
 
+        &-win {
+          color: rgb(150,0,0);
+        }
+
         .gameSymbol {
           font-size: 7rem;
+        }
+      }
+    }
+
+    &__infoBox {
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      position: absolute;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+
+      .infoBox {
+        margin-top: 20px;
+        width: 50%;
+        height: 30%;
+        background-color: rgb(41, 108, 255);
+        border: 2px solid white;
+        border-radius: 10px;
+
+        &__header {
+          margin-top: 15px;
+          width: 100%;
+          text-align: center;
+          font-size: 2rem;
+          height: 20%;
+        }
+
+        &__menu {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          width: 100%;
+          height: 80%;
+
+          .button {
+            margin-top: 20px;
+            height: 50px;
+            width: 150px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: 400;
+            background-color: white;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.5));
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            
+            &:hover {
+              &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 10px;
+                left: 10px;
+                border-bottom: 2px solid black;
+                border-right: 2px solid black;
+                border-bottom-right-radius: 10px;
+                animation: outlineButton ease-in-out 0.5s;
+              }
+            }
+          }
         }
       }
     }

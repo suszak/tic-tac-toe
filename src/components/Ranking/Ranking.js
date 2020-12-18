@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from "react";
 import "./Ranking.scss";
-import axios from "../../axios.js";
+
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+
+import axios from "../../axios.js";
 
 function Ranking() {
   const [top5Users, setTop5Users] = useState([]);
   const user = useSelector((state) => state.user);
 
+  // Send get request to download top 5 users
   const getTop5Users = async () => {
     return await axios.get("/topUsers/");
   };
 
   useEffect(() => {
+    // Download top 5 on start
     if (user.login) {
       getTop5Users().then((response) => {
         if (!response.error) {

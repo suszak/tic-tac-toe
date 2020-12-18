@@ -31,7 +31,7 @@ function UsersList({ allUsers }) {
           type="text"
           id="filter"
           onChange={() =>
-            filterUsersList(allUsers, setDataToShow, setCurrentPage)
+            filterUsersList({ users: allUsers, setDataToShow, setCurrentPage })
           }
           className="search__input"
           placeholder="Type user name here..."
@@ -48,7 +48,11 @@ function UsersList({ allUsers }) {
           </li>
 
           {currentUsers.map((user, index) => (
-            <TableItem key={index} userLogin={user.login} isAdmin={user.isAdmin} />
+            <TableItem
+              key={index}
+              userLogin={user.login}
+              isAdmin={user.isAdmin}
+            />
           ))}
         </ul>
       </main>

@@ -1,16 +1,17 @@
+import "./Login.scss";
+
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { store } from "react-notifications-component";
 import { useHistory } from "react-router-dom";
-import "./Login.scss";
 import * as formActions from "../../actions/formActions.js";
-import * as userActions from "../../actions/userActions.js";
+
+import { checkLoginSuccess } from "./helpers/checkLoginSuccess";
+
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import PersonIcon from "@material-ui/icons/Person";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import axios from "../../axios.js";
 
 function Login() {
   const dispatch = useDispatch();
@@ -20,52 +21,18 @@ function Login() {
   const [password, setPassword] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
 
+  // Handle login in state
   const handleLogin = (event) => {
     setLogin(event.target.value);
   };
 
+  // Handle password in state
   const handlePassword = (event) => {
     setPassword(event.target.value);
   };
 
-  const loginUser = async (e) => {
-    e.preventDefault();
-    const body = {
-      login: login,
-      password: password,
-    };
-    return await axios.post("/login/", body);
-  };
-
-  const checkSuccess = (e) => {
-    loginUser(e).then((response) => {
-      if (response.data.logged) {
-        // success
-        dispatch(
-          userActions.LoginUser(response.data.userLogin, response.data.isAdmin)
-        );
-        localStorage.setItem("userName", response.data.userLogin);
-        history.push("/tables");
-      } else {
-        // error
-        store.addNotification({
-          title: "Something went wrong!",
-          message: response.data.error,
-          type: "danger",
-          insert: "top",
-          container: "top-right",
-          animationIn: ["animate__animated", "animate__fadeIn"],
-          animationOut: ["animate__animated", "animate__fadeOut"],
-          dismiss: {
-            duration: 5000,
-            onScreen: true,
-          },
-        });
-      }
-    });
-  };
-
   useEffect(() => {
+    // Check if inputs are filled
     if (login !== "" && password !== "") {
       setButtonDisabled(false);
     } else {
@@ -76,7 +43,12 @@ function Login() {
   return (
     <section className="login">
       <h3 className="login__header">Login</h3>
-      <form className="form" onSubmit={checkSuccess}>
+      <form
+        className="form"
+        onSubmit={(e) =>
+          checkLoginSuccess({ e, login, password, history, dispatch })
+        }
+      >
         <section className="form__nickname">
           <PersonIcon className="icon" />
           <input

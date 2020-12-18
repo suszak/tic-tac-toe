@@ -1,10 +1,10 @@
-export const updateTableField = (
+export const updateTableField = ({
   userName,
   tableID,
   userNumber,
   rankPoints,
-  currentTables
-) => {
+  currentTables,
+}) => {
   return currentTables.map((table) => {
     if (tableID === table.id) {
       if (userNumber === 1) {

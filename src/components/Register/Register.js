@@ -1,16 +1,18 @@
+import "./Register.scss";
+
+import * as formActions from "../../actions/formActions.js";
+import { checkRegisterSuccess } from "./helpers/checkRegisterSuccess";
+
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Tooltip from "rc-tooltip";
-import { store } from "react-notifications-component";
-import "./Register.scss";
-import * as formActions from "../../actions/formActions.js";
+
 import PersonIcon from "@material-ui/icons/Person";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import "rc-tooltip/assets/bootstrap.css";
-import axios from "../../axios.js";
 
 function Register() {
   const dispatch = useDispatch();
@@ -21,6 +23,7 @@ function Register() {
   const [passwordRepeated, setPasswordRepeated] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
 
+  // Handle state
   const handleLogin = (event) => {
     setLogin(event.target.value);
   };
@@ -33,41 +36,8 @@ function Register() {
     setPasswordRepeated(event.target.value);
   };
 
-  const registerUser = async (e) => {
-    e.preventDefault();
-    const body = {
-      login: login,
-      password: password,
-    };
-
-    return await axios.post("/register/", body);
-  };
-
-  const checkSuccess = (e) => {
-    registerUser(e).then((response) => {
-      if (response.data.registered) {
-        // Success
-        dispatch(formActions.changeFormType("login"));
-      } else {
-        // Error
-        store.addNotification({
-          title: "Something went wrong!",
-          message: response.data.error,
-          type: "danger",
-          insert: "top",
-          container: "top-right",
-          animationIn: ["animate__animated", "animate__fadeIn"],
-          animationOut: ["animate__animated", "animate__fadeOut"],
-          dismiss: {
-            duration: 5000,
-            onScreen: true,
-          },
-        });
-      }
-    });
-  };
-
   useEffect(() => {
+    // Form validation
     if (
       login !== "" &&
       password.length >= 6 &&
@@ -98,7 +68,10 @@ function Register() {
   return (
     <section className="register">
       <h3 className="register__header">Register</h3>
-      <form className="form" onSubmit={checkSuccess}>
+      <form
+        className="form"
+        onSubmit={(e) => checkRegisterSuccess({ e, login, password, dispatch })}
+      >
         <section className="form__nickname">
           <PersonIcon className="icon" />
           <input

@@ -1,4 +1,4 @@
-export const filterUsersList = (users, setDataToShow, setCurrentPage) => {
+export const filterUsersList = ({ users, setDataToShow, setCurrentPage }) => {
   const filterValue = document.querySelector("#filter").value;
   console.log(filterValue);
   if (filterValue.length > 0) {

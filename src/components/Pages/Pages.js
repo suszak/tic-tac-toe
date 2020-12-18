@@ -5,6 +5,7 @@ const Pages = ({ currentPage, totalPages, paginate }) => {
   const [pageNumbers, setPageNumbers] = useState([]);
 
   useEffect(() => {
+    // Show max 5 pages in navigation
     if (totalPages >= 5) {
       if (currentPage - 2 > 1 && currentPage + 2 < totalPages) {
         setPageNumbers(
@@ -26,6 +27,7 @@ const Pages = ({ currentPage, totalPages, paginate }) => {
         );
       }
     } else {
+      // If less then 5 pages to show -> show all of them
       setPageNumbers(
         Array(totalPages)
           .fill(1)

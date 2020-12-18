@@ -5,80 +5,128 @@ import "./GameTable.scss";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
 import CloseIcon from "@material-ui/icons/Close";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
-import { randomBeginner } from "./helpers/randomBeginner";
-import { usePrevious } from "../../helpers/usePrevious";
+import { checkWinner } from "./helpers/checkWinner";
 import { setGameSymbol } from "../../helpers/setGameSymbol";
+import { chooseBeginner } from "./helpers/chooseBiginner";
 
 function Table() {
   const { id } = useParams();
   const [tableInfo, setTableInfo] = useState({});
+  const [gameTable, setGameTable] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [turn, setTurn] = useState(0);
   const [userNumber, setUserNumber] = useState(0);
+  const [gameEnd, setGameEnd] = useState(false);
+  const [winner, setWinner] = useState("");
+  const [ready, setReady] = useState({});
   const user = useSelector((state) => state.user);
   const tables = useSelector((state) => state.tables.tables);
   const socketRef = useSelector((state) => state.socket.socketRef);
   const history = useHistory();
 
-  const prevTableInfo = usePrevious(tableInfo);
+  const sendFirstTurn = () => {
+    if (tableInfo.ready && user.login === tableInfo.user1 && turn === 0) {
+      const newTurn = chooseBeginner();
+      setTurn(newTurn);
+      setGameTable([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      socketRef.emit("newTurn", {
+        room: "table" + id,
+        turn: newTurn,
+        gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      });
+    }
+  };
+
+  const bindUserNumberAndSetTurn = () => {
+    if (user.login === tableInfo.user1) {
+      setUserNumber(1);
+    }
+    if (user.login === tableInfo.user2) {
+      setUserNumber(2);
+    }
+    setTurn(tableInfo.ready ? turn : 0);
+  };
+
+  // Call once on sturtup
+  useEffect(() => {
+    socketRef.on("newTurn", (data) => {
+      setTurn(data.newTurn);
+      setGameTable(data.gameTable);
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (user.login) {
-      //  socket events
-      socketRef.on("newTurn", (data) => {
-        // console.log(data);
-        setTurn(data);
-      });
+      setTableInfo(
+        {
+          user1: tables[id - 1].user1,
+          user2: tables[id - 1].user2,
+          user1RankPoints: tables[id - 1].user1RankPoints,
+          user2RankPoints: tables[id - 1].user2RankPoints,
+          ready:
+            tables[id - 1].user1 !== "" && tables[id - 1].user2 !== ""
+              ? true
+              : false,
+        },
+        bindUserNumberAndSetTurn()
+      );
 
-      socketRef.on("tableChanged", (data) => {
-        // console.log(data);
-        setTurn(data.turn);
-        setTableInfo({
-          ...tableInfo,
-          gameTable: data.gameTable,
-        });
-      });
+      sendFirstTurn();
 
-      //  Set userNumber
-      if (user.login === tables[id - 1].user1) {
-        setUserNumber(1);
-      }
-      if (user.login === tables[id - 1].user2) {
-        setUserNumber(2);
-      }
+      const user1Winner = checkWinner(gameTable, 1);
+      const user2Winner = checkWinner(gameTable, 2);
 
-      // Check if both players are ready to game
-      let newReady = false;
-      if (tables[id - 1].user1 !== "" && tables[id - 1].user2 !== "") {
-        newReady = true;
+      if (user1Winner.isWinner) {
+        setWinner(tableInfo.user1);
+        setGameEnd(true);
 
-        if (
-          tables[id - 1].user1 === user.login &&
-          prevTableInfo.ready === false
-        ) {
-          const beginner = randomBeginner();
-          setTurn(beginner);
+        const squares = document.querySelectorAll(".square");
+        const winnerSquares = [
+          squares[user1Winner.winnerFields[0]],
+          squares[user1Winner.winnerFields[1]],
+          squares[user1Winner.winnerFields[2]],
+        ];
 
-          // Send information about beginner
-          socketRef.emit("newTurn", { room: "table" + id, turn: beginner });
+        winnerSquares.forEach((el) => el.classList.add("square-win"));
+
+        if (user.login === tableInfo.user1) {
+          socketRef.emit("gameEnded", {
+            winner: tableInfo.user1,
+            loser: tableInfo.user2,
+            winnerPoints: tableInfo.user1RankPoints,
+            loserPoints: tableInfo.user2RankPoints,
+          });
         }
-      } else {
-        // setTurn(0);
-        newReady = false;
+      } else if (user2Winner.isWinner) {
+        setWinner(tableInfo.user2);
+        setGameEnd(true);
+
+        const squares = document.querySelectorAll(".square");
+        const winnerSquares = [
+          squares[user2Winner.winnerFields[0]],
+          squares[user2Winner.winnerFields[1]],
+          squares[user2Winner.winnerFields[2]],
+        ];
+
+        winnerSquares.forEach((el) => el.classList.add("square-win"));
+
+        if (user.login === tableInfo.user1) {
+          socketRef.emit("gameEnded", {
+            winner: tableInfo.user2,
+            loser: tableInfo.user1,
+            winnerPoints: tableInfo.user2RankPoints,
+            loserPoints: tableInfo.user1RankPoints,
+          });
+        }
+      } else if (user1Winner.tableIsFull) {
+        setGameEnd(true);
       }
-      // Set local table informations
-      setTableInfo({
-        user1: tables[id - 1].user1,
-        user2: tables[id - 1].user2,
-        user1RankPoints: tables[id - 1].user1RankPoints,
-        user2RankPoints: tables[id - 1].user2RankPoints,
-        gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ready: newReady,
-      });
     } else {
       history.replace("/tables");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tables]);
+  }, [tables, gameTable]);
 
   return (
     <div className="gameTable">
@@ -122,7 +170,7 @@ function Table() {
 
         {tableInfo.ready ? (
           <main className="gameField__main">
-            {tableInfo.gameTable.map((el, index) => {
+            {gameTable.map((el, index) => {
               return (
                 <div
                   className={
@@ -133,14 +181,11 @@ function Table() {
                   onClick={
                     el === 0 && turn === userNumber
                       ? () => {
-                          let newGameTable = [...tableInfo.gameTable];
+                          let newGameTable = [...gameTable];
                           newGameTable[index] = userNumber;
-                          setTableInfo({
-                            ...tableInfo,
-                            gameTable: [...newGameTable],
-                          });
+                          setGameTable(newGameTable);
                           setTurn((turn % 2) + 1);
-                          socketRef.emit("tableChanged", {
+                          socketRef.emit("newTurn", {
                             room: "table" + id,
                             turn: (turn % 2) + 1,
                             gameTable: newGameTable,
@@ -157,6 +202,22 @@ function Table() {
           </main>
         ) : (
           <h3 className="gameField__information">Waiting for opponent...</h3>
+        )}
+
+        {gameEnd ? (
+          <section className="gameField__infoBox">
+            <div className="infoBox">
+              <header className="infoBox__header">
+                {winner !== "" ? `${winner} wins!` : "Draw!"}
+              </header>
+              <nav className="infoBox__menu">
+                <button className="button">Play again</button>
+                <button className="button">Leave</button>
+              </nav>
+            </div>
+          </section>
+        ) : (
+          ""
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import "./GameTable.scss";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
 import CloseIcon from "@material-ui/icons/Close";
@@ -8,6 +8,7 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import { checkWinner } from "./helpers/checkWinner";
 import { setGameSymbol } from "../../helpers/setGameSymbol";
 import { chooseBeginner } from "./helpers/chooseBiginner";
+import { playAgain } from "./helpers/playAgain";
 
 function Table() {
   const { id } = useParams();
@@ -17,11 +18,11 @@ function Table() {
   const [userNumber, setUserNumber] = useState(0);
   const [gameEnd, setGameEnd] = useState(false);
   const [winner, setWinner] = useState("");
-  const [ready, setReady] = useState({});
   const user = useSelector((state) => state.user);
   const tables = useSelector((state) => state.tables.tables);
   const socketRef = useSelector((state) => state.socket.socketRef);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const sendFirstTurn = () => {
     if (tableInfo.ready && user.login === tableInfo.user1 && turn === 0) {
@@ -57,23 +58,11 @@ function Table() {
   }, []);
 
   useEffect(() => {
-    if (user.login) {
-      setTableInfo(
-        {
-          user1: tables[id - 1].user1,
-          user2: tables[id - 1].user2,
-          user1RankPoints: tables[id - 1].user1RankPoints,
-          user2RankPoints: tables[id - 1].user2RankPoints,
-          ready:
-            tables[id - 1].user1 !== "" && tables[id - 1].user2 !== ""
-              ? true
-              : false,
-        },
-        bindUserNumberAndSetTurn()
-      );
-
-      sendFirstTurn();
-
+    if (
+      !gameEnd &&
+      tables[id - 1].user1 !== "" &&
+      tables[id - 1].user2 !== ""
+    ) {
       const user1Winner = checkWinner(gameTable, 1);
       const user2Winner = checkWinner(gameTable, 2);
 
@@ -109,7 +98,7 @@ function Table() {
           squares[user2Winner.winnerFields[2]],
         ];
 
-        winnerSquares.forEach((el) => el.classList.add("square-win"));
+        winnerSquares?.forEach((el) => el.classList.add("square-win"));
 
         if (user.login === tableInfo.user1) {
           socketRef.emit("gameEnded", {
@@ -122,11 +111,32 @@ function Table() {
       } else if (user1Winner.tableIsFull) {
         setGameEnd(true);
       }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameTable]);
+
+  useEffect(() => {
+    if (user.login) {
+      setTableInfo(
+        {
+          user1: tables[id - 1].user1,
+          user2: tables[id - 1].user2,
+          user1RankPoints: tables[id - 1].user1RankPoints,
+          user2RankPoints: tables[id - 1].user2RankPoints,
+          ready:
+            tables[id - 1].user1 !== "" && tables[id - 1].user2 !== ""
+              ? true
+              : false,
+        },
+        bindUserNumberAndSetTurn()
+      );
+
+      sendFirstTurn();
     } else {
       history.replace("/tables");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tables, gameTable]);
+  }, [tables]);
 
   return (
     <div className="gameTable">
@@ -211,8 +221,34 @@ function Table() {
                 {winner !== "" ? `${winner} wins!` : "Draw!"}
               </header>
               <nav className="infoBox__menu">
-                <button className="button">Play again</button>
-                <button className="button">Leave</button>
+                <button
+                  className="button"
+                  onClick={() => {
+                    playAgain({
+                      setTableInfo,
+                      setGameTable,
+                      setUserNumber,
+                      setWinner,
+                      setGameEnd,
+                      setTurn,
+                      tables,
+                      id,
+                      bindUserNumberAndSetTurn,
+                      dispatch,
+                    });
+                  }}
+                >
+                  Play again
+                </button>
+                <button
+                  className="button"
+                  onClick={() => {
+                    socketRef.emit("leaveTable", { room: "table" + id });
+                    history.replace("/tables");
+                  }}
+                >
+                  Leave
+                </button>
               </nav>
             </div>
           </section>

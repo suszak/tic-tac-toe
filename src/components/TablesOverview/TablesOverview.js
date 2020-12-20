@@ -1,24 +1,22 @@
 import "./TablesOverview.scss";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { updateTableField } from "./../../helpers/updateTableField";
 
-import { io } from "socket.io-client";
 import * as tablesActions from "../../actions/tablesActions.js";
-import * as socketActions from "../../actions/socketActions.js";
 import axios from "../../axios.js";
 import { joinTable } from "./helpers/joinTable";
 import { updateTables } from "./helpers/updateTables";
 
 function Tables() {
   const dispatch = useDispatch();
-  const socketRef = useRef();
   const history = useHistory();
 
   const user = useSelector((state) => state.user);
   const tables = useSelector((state) => state.tables.tables);
+  const socketRef = useSelector((state) => state.socket.socketRef);
 
   const [rankPoints, setRankPoints] = useState("updating...");
 
@@ -34,16 +32,7 @@ function Tables() {
   };
 
   useEffect(() => {
-    const room = "tables";
-
-    socketRef.current = io("http://localhost:8002", {
-      query: { room },
-      extraHeaders: { login: user.login },
-    });
-
-    dispatch(socketActions.socketSet(socketRef.current));
-
-    socketRef.current.on(
+    socketRef.on(
       "tablesUpdated",
       ({
         userName,
@@ -69,7 +58,7 @@ function Tables() {
       }
     );
 
-    socketRef.current.on("userDisconnected", () => {
+    socketRef.on("userDisconnected", () => {
       getTables().then((response) => {
         if (!response.error) {
           dispatch(tablesActions.UpdateTables(response.data));
@@ -146,7 +135,7 @@ function Tables() {
                                 rankPoints,
                               });
                               if (data.changed) {
-                                socketRef.current.emit("joinGame", {
+                                socketRef.emit("joinGame", {
                                   room: "table" + table.id,
                                 });
 
@@ -157,10 +146,7 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRef.current.emit(
-                                      "tablesUpdated",
-                                      data
-                                    );
+                                    socketRef.emit("tablesUpdated", data);
                                     history.replace(`/table/${table.id}`);
                                   }
                                 });
@@ -190,7 +176,7 @@ function Tables() {
                                 rankPoints,
                               });
                               if (data.changed) {
-                                socketRef.current.emit("joinGame", {
+                                socketRef.emit("joinGame", {
                                   room: "table" + table.id,
                                 });
 
@@ -201,10 +187,7 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRef.current.emit(
-                                      "tablesUpdated",
-                                      data
-                                    );
+                                    socketRef.emit("tablesUpdated", data);
                                     history.replace(`/table/${table.id}`);
                                   }
                                 });

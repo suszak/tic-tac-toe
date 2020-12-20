@@ -1,11 +1,12 @@
 import "./TablesOverview.scss";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { io } from "socket.io-client";
 import { updateTableField } from "./../../helpers/updateTableField";
-
 import * as tablesActions from "../../actions/tablesActions.js";
+import * as socketActions from "../../actions/socketActions.js";
 import axios from "../../axios.js";
 import { joinTable } from "./helpers/joinTable";
 import { updateTables } from "./helpers/updateTables";
@@ -13,10 +14,11 @@ import { updateTables } from "./helpers/updateTables";
 function Tables() {
   const dispatch = useDispatch();
   const history = useHistory();
+  const socketRef = useRef();
 
   const user = useSelector((state) => state.user);
   const tables = useSelector((state) => state.tables.tables);
-  const socketRef = useSelector((state) => state.socket.socketRef);
+  const socketRefRedux = useSelector((state) => state.socket.socketRef);
 
   const [rankPoints, setRankPoints] = useState("updating...");
 
@@ -32,39 +34,85 @@ function Tables() {
   };
 
   useEffect(() => {
-    socketRef.on(
-      "tablesUpdated",
-      ({
-        userName,
-        rankPoints,
-        tableID,
-        userNumber,
-        currentTables,
-        changed,
-      }) => {
-        if (changed && rankPoints !== "updating...") {
-          dispatch(
-            tablesActions.UpdateTables(
-              updateTableField({
-                userName,
-                tableID,
-                userNumber,
-                rankPoints,
-                currentTables,
-              })
-            )
-          );
-        }
-      }
-    );
+    if (!socketRefRedux) {
+      const room = "tables";
 
-    socketRef.on("userDisconnected", () => {
-      getTables().then((response) => {
-        if (!response.error) {
-          dispatch(tablesActions.UpdateTables(response.data));
-        }
+      socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
+        query: { room },
+        extraHeaders: { login: user.login },
       });
-    });
+
+      dispatch(socketActions.socketSet(socketRef.current));
+
+      socketRef.current.on(
+        "tablesUpdated",
+        ({
+          userName,
+          rankPoints,
+          tableID,
+          userNumber,
+          currentTables,
+          changed,
+        }) => {
+          if (changed && rankPoints !== "updating...") {
+            dispatch(
+              tablesActions.UpdateTables(
+                updateTableField({
+                  userName,
+                  tableID,
+                  userNumber,
+                  rankPoints,
+                  currentTables,
+                })
+              )
+            );
+          }
+        }
+      );
+
+      socketRef.current.on("userDisconnected", () => {
+        getTables().then((response) => {
+          if (!response.error) {
+            dispatch(tablesActions.UpdateTables(response.data));
+          }
+        });
+      });
+    } else {
+      socketRefRedux.on(
+        "tablesUpdated",
+        ({
+          userName,
+          rankPoints,
+          tableID,
+          userNumber,
+          currentTables,
+          changed,
+        }) => {
+          if (changed && rankPoints !== "updating...") {
+            dispatch(
+              tablesActions.UpdateTables(
+                updateTableField({
+                  userName,
+                  tableID,
+                  userNumber,
+                  rankPoints,
+                  currentTables,
+                })
+              )
+            );
+          }
+        }
+      );
+
+      socketRefRedux.on("userDisconnected", () => {
+        getTables().then((response) => {
+          if (!response.error) {
+            dispatch(tablesActions.UpdateTables(response.data));
+          }
+        });
+      });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,7 +183,7 @@ function Tables() {
                                 rankPoints,
                               });
                               if (data.changed) {
-                                socketRef.emit("joinGame", {
+                                socketRefRedux.emit("joinGame", {
                                   room: "table" + table.id,
                                 });
 
@@ -146,7 +194,7 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRef.emit("tablesUpdated", data);
+                                    socketRefRedux.emit("tablesUpdated", data);
                                     history.replace(`/table/${table.id}`);
                                   }
                                 });
@@ -176,7 +224,7 @@ function Tables() {
                                 rankPoints,
                               });
                               if (data.changed) {
-                                socketRef.emit("joinGame", {
+                                socketRefRedux.emit("joinGame", {
                                   room: "table" + table.id,
                                 });
 
@@ -187,7 +235,7 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRef.emit("tablesUpdated", data);
+                                    socketRefRedux.emit("tablesUpdated", data);
                                     history.replace(`/table/${table.id}`);
                                   }
                                 });

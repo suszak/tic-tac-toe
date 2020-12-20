@@ -1,27 +1,8 @@
-import React, { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import * as socketActions from "../../actions/socketActions.js";
-import { io } from "socket.io-client";
+import React from "react";
 import "./Header.scss";
 import Logo from "../../pictures/icon.png";
 
 function Header() {
-  const dispatch = useDispatch();
-  const socketRef = useRef();
-  const user = useSelector((state) => state.user);
-
-  useEffect(() => {
-    const room = "tables";
-
-    socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
-      query: { room },
-      extraHeaders: { login: user.login },
-    });
-
-    dispatch(socketActions.socketSet(socketRef.current));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <header className="header">
       <img className="header__logo" src={Logo} alt="TicTacToe Logo" />

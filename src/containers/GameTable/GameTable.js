@@ -56,7 +56,8 @@ function Table() {
       if (!socketRefRedux) {
         const room = "tables";
 
-        socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
+        socketRef.current = io("http://localhost:8002", {
+          // socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
           query: { room },
           extraHeaders: { login: user.login },
         });

@@ -35,11 +35,8 @@ function Tables() {
 
   useEffect(() => {
     if (!socketRefRedux) {
-      const room = "tables";
-
       socketRef.current = io("http://localhost:8002", {
         // socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
-        query: { room },
         extraHeaders: { login: user.login },
       });
 
@@ -71,7 +68,7 @@ function Tables() {
         }
       );
 
-      socketRef.current.on("userDisconnected", () => {
+      socketRef.current.on("tablesRefreshed", () => {
         getTables().then((response) => {
           if (!response.error) {
             dispatch(tablesActions.UpdateTables(response.data));
@@ -105,7 +102,7 @@ function Tables() {
         }
       );
 
-      socketRefRedux.on("userDisconnected", () => {
+      socketRefRedux.on("tablesRefreshed", () => {
         getTables().then((response) => {
           if (!response.error) {
             dispatch(tablesActions.UpdateTables(response.data));
@@ -195,8 +192,8 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRefRedux.emit("tablesUpdated", data);
-                                    history.replace(`/table/${table.id}`);
+                                    socketRefRedux.emit("tablesUpdate", data);
+                                    history.push(`/table/${table.id}`);
                                   }
                                 });
                               }
@@ -236,8 +233,8 @@ function Tables() {
                                   tableID: table.id,
                                 }).then((response) => {
                                   if (response.data.updated) {
-                                    socketRefRedux.emit("tablesUpdated", data);
-                                    history.replace(`/table/${table.id}`);
+                                    socketRefRedux.emit("tablesUpdate", data);
+                                    history.push(`/table/${table.id}`);
                                   }
                                 });
                               }

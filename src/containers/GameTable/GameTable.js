@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { io } from "socket.io-client";
-import * as socketActions from "../../actions/socketActions.js";
+import { useSelector } from "react-redux";
 import "./GameTable.scss";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
 import CloseIcon from "@material-ui/icons/Close";
@@ -12,7 +10,7 @@ import { setGameSymbol } from "../../helpers/setGameSymbol";
 import { chooseBeginner } from "./helpers/chooseBiginner";
 import { playAgain } from "./helpers/playAgain";
 
-function Table() {
+function GameTable() {
   const { id } = useParams();
   const [tableInfo, setTableInfo] = useState({});
   const [gameTable, setGameTable] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -24,61 +22,74 @@ function Table() {
   const tables = useSelector((state) => state.tables.tables);
   const socketRefRedux = useSelector((state) => state.socket.socketRef);
   const history = useHistory();
-  const dispatch = useDispatch();
-  const socketRef = useRef();
 
   const sendFirstTurn = () => {
-    if (tableInfo.ready && user.login === tableInfo.user1 && turn === 0) {
-      const newTurn = chooseBeginner();
-      setTurn(newTurn);
-      setGameTable([0, 0, 0, 0, 0, 0, 0, 0, 0]);
-      socketRefRedux.emit("newTurn", {
-        room: "table" + id,
-        turn: newTurn,
-        gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      });
+    if (user.login === tableInfo.user1) {
+      if (tableInfo.user1 !== "" && tableInfo.user2 !== "" && turn === 0) {
+        const newTurn = chooseBeginner();
+        setTurn(newTurn);
+        setGameTable([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        socketRefRedux.emit("newTurnInc", {
+          room: "table" + id,
+          turn: newTurn,
+          gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        });
+      }
     }
   };
 
-  const bindUserNumberAndSetTurn = () => {
-    if (user.login === tableInfo.user1) {
+  const bindUserNumber = () => {
+    if (user.login === tables[id - 1].user1) {
       setUserNumber(1);
     }
-    if (user.login === tableInfo.user2) {
+    if (user.login === tables[id - 1].user2) {
       setUserNumber(2);
     }
-    setTurn(tableInfo.ready ? turn : 0);
   };
 
   // Call once on sturtup
-  useEffect(() => {
-    if (user.login) {
-      if (!socketRefRedux) {
-        const room = "tables";
-
-        socketRef.current = io("http://localhost:8002", {
-          // socketRef.current = io("https://pai-tic-tac-toe.herokuapp.com/", {
-          query: { room },
-          extraHeaders: { login: user.login },
+  useEffect(
+    () => {
+      if (user.login) {
+        socketRefRedux.on("userJoined", (data) => {
+          if (data.room === "table" + id) {
+            sendFirstTurn();
+          }
         });
 
-        dispatch(socketActions.socketSet(socketRef.current));
-        socketRef.current.on("newTurn", (data) => {
-          setTurn(data.newTurn);
-          setGameTable(data.gameTable);
+        socketRefRedux.on("newTurn", (data) => {
+          if (data.room === "table" + id) {
+            setTurn(data.newTurn);
+            setGameTable(data.gameTable);
+          }
+        });
+
+        socketRefRedux.on("playAgain", (data) => {
+          if (data.room === "table" + id) {
+            const newTurn = chooseBeginner();
+            setTurn(newTurn);
+            setGameTable([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            socketRefRedux.emit("newTurnInc", {
+              room: "table" + id,
+              turn: newTurn,
+              gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            });
+          }
         });
       } else {
-        socketRefRedux.on("newTurn", (data) => {
-          setTurn(data.newTurn);
-          setGameTable(data.gameTable);
-        });
+        history.replace("/tables");
       }
-    } else {
-      history.replace("/tables");
-    }
 
+      return () => {
+        // cleanup
+        socketRefRedux.removeAllListeners("newTurn");
+        socketRefRedux.removeAllListeners("playAgain");
+        socketRefRedux.removeAllListeners("userJoined");
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    []
+  );
 
   useEffect(() => {
     if (
@@ -92,6 +103,7 @@ function Table() {
       if (user1Winner.isWinner) {
         setWinner(tableInfo.user1);
         setGameEnd(true);
+        setTurn(3);
 
         const squares = document.querySelectorAll(".square");
         const winnerSquares = [
@@ -113,6 +125,7 @@ function Table() {
       } else if (user2Winner.isWinner) {
         setWinner(tableInfo.user2);
         setGameEnd(true);
+        setTurn(3);
 
         const squares = document.querySelectorAll(".square");
         const winnerSquares = [
@@ -133,30 +146,32 @@ function Table() {
         }
       } else if (user1Winner.tableIsFull) {
         setGameEnd(true);
+        setTurn(3);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameTable]);
 
   useEffect(() => {
-    setTableInfo(
-      {
-        user1: tables[id - 1].user1,
-        user2: tables[id - 1].user2,
-        user1RankPoints: tables[id - 1].user1RankPoints,
-        user2RankPoints: tables[id - 1].user2RankPoints,
-        ready:
-          tables[id - 1].user1 !== "" && tables[id - 1].user2 !== ""
-            ? true
-            : false,
-      },
-      bindUserNumberAndSetTurn()
-    );
-
-    sendFirstTurn();
+    setTableInfo({
+      user1: tables[id - 1].user1,
+      user2: tables[id - 1].user2,
+      user1RankPoints: tables[id - 1].user1RankPoints,
+      user2RankPoints: tables[id - 1].user2RankPoints,
+      ready:
+        tables[id - 1].user1 !== "" && tables[id - 1].user2 !== ""
+          ? true
+          : false,
+    });
+    bindUserNumber();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tables]);
+
+  useEffect(() => {
+    sendFirstTurn();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableInfo]);
 
   return (
     <div className="gameTable">
@@ -215,7 +230,7 @@ function Table() {
                           newGameTable[index] = userNumber;
                           setGameTable(newGameTable);
                           setTurn((turn % 2) + 1);
-                          socketRefRedux.emit("newTurn", {
+                          socketRefRedux.emit("newTurnInc", {
                             room: "table" + id,
                             turn: (turn % 2) + 1,
                             gameTable: newGameTable,
@@ -247,14 +262,28 @@ function Table() {
                     playAgain({
                       setTableInfo,
                       setGameTable,
-                      setUserNumber,
                       setWinner,
-                      setGameEnd,
                       setTurn,
+                      setGameEnd,
                       tables,
                       id,
-                      bindUserNumberAndSetTurn,
-                      dispatch,
+                    }).then(() => {
+                      if (tableInfo.ready && user.login === tableInfo.user1) {
+                        const newTurn = chooseBeginner();
+                        setTurn(newTurn);
+                        setGameTable([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                        socketRefRedux.emit("newTurnInc", {
+                          room: "table" + id,
+                          turn: newTurn,
+                          gameTable: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        });
+                      }
+
+                      if (tableInfo.ready && user.login === tableInfo.user2) {
+                        socketRefRedux.emit("wannaPlayAgain", {
+                          room: "table" + id,
+                        });
+                      }
                     });
                   }}
                 >
@@ -280,4 +309,4 @@ function Table() {
   );
 }
 
-export default Table;
+export default GameTable;

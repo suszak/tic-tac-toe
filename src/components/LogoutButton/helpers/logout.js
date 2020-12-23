@@ -15,7 +15,7 @@ export const logout = ({ tables, user, socketRef, dispatch, history }) => {
   const data = leaveTable(tables, user.login);
   updateTables(data).then(() => {
     // Send info about change in tables
-    socketRef.emit("tablesUpdated", data);
+    socketRef.emit("tablesUpdate", data);
 
     // Clear stores
     dispatch(userActions.LogoutUser());
